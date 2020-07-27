@@ -21,5 +21,11 @@ public class Element : MonoBehaviour
     public void setType(int type)
     {
         this.type = type;
+        GetComponent<SpriteRenderer>().sprite = GameObject.Find("Board").GetComponent<Board>().getElementSprite(type);
+    }
+
+    public int getType()
+    {
+        return this.type;
     }
 }

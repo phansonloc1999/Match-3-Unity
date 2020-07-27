@@ -4,14 +4,14 @@ using UnityEngine;
 
 public class Cell : MonoBehaviour
 {
-    private static Board board = null;
+    static Board boardScript = null;
 
     // Start is called before the first frame update
     void Start()
     {
-        if (board == null)
+        if (boardScript == null)
         {
-            board = GetComponentInParent<Board>();
+            boardScript = GameObject.Find("Board").GetComponent<Board>();
         }
     }
 
@@ -23,6 +23,6 @@ public class Cell : MonoBehaviour
 
     private void OnMouseDown()
     {
-        board.OnCellSelection(gameObject);
+        boardScript.onCellSelection(gameObject);
     }
 }

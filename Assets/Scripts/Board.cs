@@ -12,7 +12,7 @@ public class Board : MonoBehaviour
     public Sprite[] ELEMENT_SPRITES;
 
     [SerializeField]
-    private List<GameObject> selectedCells;
+    private GameObject selectedCell;
 
     // Start is called before the first frame update
     void Start()
@@ -31,23 +31,32 @@ public class Board : MonoBehaviour
                 var cell = Instantiate(cellPrefab, cellPos, transform.rotation, transform);
                 var elementType = Random.Range(0, ELEMENT_SPRITES.Length);
                 cell.GetComponentInChildren<Element>().setType(elementType);
-                cell.transform.GetChild(0).GetComponent<SpriteRenderer>().sprite = ELEMENT_SPRITES[elementType];
             }
         }
 
-        selectedCells = new List<GameObject>();
+        selectedCell = null;
     }
 
-    public void OnCellSelection(GameObject cell)
+    public void onCellSelection(GameObject target)
     {
-        if (selectedCells.Count == 0)
+        if (selectedCell == null)
         {
-            selectedCells.Add(cell);
+            selectedCell = target;
         }
         else
         {
-            selectedCells = new List<GameObject>();
+            var selectedScript = selectedCell.GetComponentInChildren<Element>();
+            var targetScript = target.GetComponentInChildren<Element>();
+            var temp = selectedScript.getType();
+            selectedScript.setType(targetScript.getType());
+            targetScript.setType(temp);
+
+            selectedCell = null;
         }
     }
 
+    public Sprite getElementSprite(int index)
+    {
+        return ELEMENT_SPRITES[index];
+    }
 }
