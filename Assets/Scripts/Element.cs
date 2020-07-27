@@ -2,17 +2,14 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public class Cell : MonoBehaviour
+public class Element : MonoBehaviour
 {
-    private static Board board = null;
+    private int type;
 
     // Start is called before the first frame update
     void Start()
     {
-        if (board == null)
-        {
-            board = GetComponentInParent<Board>();
-        }
+
     }
 
     // Update is called once per frame
@@ -21,8 +18,8 @@ public class Cell : MonoBehaviour
 
     }
 
-    private void OnMouseDown()
+    public void setType(int type)
     {
-        board.OnCellSelection(gameObject);
+        this.type = type;
     }
 }
