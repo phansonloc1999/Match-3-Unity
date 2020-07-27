@@ -6,10 +6,19 @@ public class Element : MonoBehaviour
 {
     private int type;
 
-    // Start is called before the first frame update
-    void Start()
-    {
+    private SpriteRenderer spriteRenderer;
 
+    static Board boardScript = null;
+
+    // Start is called before the first frame update
+    void Awake()
+    {
+        spriteRenderer = GetComponent<SpriteRenderer>();
+
+        if (boardScript == null)
+        {
+            boardScript = GameObject.Find("Board").GetComponent<Board>();
+        }
     }
 
     // Update is called once per frame
@@ -21,7 +30,7 @@ public class Element : MonoBehaviour
     public void setType(int type)
     {
         this.type = type;
-        GetComponent<SpriteRenderer>().sprite = GameObject.Find("Board").GetComponent<Board>().getElementSprite(type);
+        spriteRenderer.sprite = boardScript.getElementSprite(type);
     }
 
     public int getType()

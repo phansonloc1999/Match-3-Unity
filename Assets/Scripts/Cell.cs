@@ -6,6 +6,9 @@ public class Cell : MonoBehaviour
 {
     static Board boardScript = null;
 
+    public int row;
+    public int column;
+
     // Start is called before the first frame update
     void Start()
     {
@@ -24,5 +27,11 @@ public class Cell : MonoBehaviour
     private void OnMouseDown()
     {
         boardScript.onCellSelection(gameObject);
+    }
+
+    public void savePositionInBoard(int row, int column)
+    {
+        this.row = row;
+        this.column = column;
     }
 }

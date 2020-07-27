@@ -28,9 +28,10 @@ public class Board : MonoBehaviour
             for (int column = 0; column < NUM_OF_COLUMN; column++)
             {
                 Vector3 cellPos = new Vector3(transform.position.x + cellWidth / 2 + column * cellWidth, transform.position.y - cellHeight / 2 - row * cellHeight, transform.position.z);
-                var cell = Instantiate(cellPrefab, cellPos, transform.rotation, transform);
+                var cellObj = Instantiate(cellPrefab, cellPos, transform.rotation, transform);
                 var elementType = Random.Range(0, ELEMENT_SPRITES.Length);
-                cell.GetComponentInChildren<Element>().setType(elementType);
+                cellObj.GetComponentInChildren<Element>().setType(elementType);
+                cellObj.GetComponent<Cell>().savePositionInBoard(row, column);
             }
         }
 
@@ -45,11 +46,20 @@ public class Board : MonoBehaviour
         }
         else
         {
-            var selectedScript = selectedCell.GetComponentInChildren<Element>();
-            var targetScript = target.GetComponentInChildren<Element>();
-            var temp = selectedScript.getType();
-            selectedScript.setType(targetScript.getType());
-            targetScript.setType(temp);
+            var selectedRow = selectedCell.GetComponent<Cell>().row;
+            var selectedColumn = selectedCell.GetComponent<Cell>().column;
+            var targetRow = target.GetComponent<Cell>().row;
+            var targetColumn = target.GetComponent<Cell>().column;
+
+            if (areNeighborCells(selectedRow, selectedColumn, targetRow, targetColumn))
+            {
+                var selectedElementScript = selectedCell.GetComponentInChildren<Element>();
+                var targetElementScript = target.GetComponentInChildren<Element>();
+
+                var temp = selectedElementScript.getType();
+                selectedElementScript.setType(targetElementScript.getType());
+                targetElementScript.setType(temp);
+            }
 
             selectedCell = null;
         }
@@ -58,5 +68,10 @@ public class Board : MonoBehaviour
     public Sprite getElementSprite(int index)
     {
         return ELEMENT_SPRITES[index];
+    }
+
+    private bool areNeighborCells(int row, int column, int row1, int column1)
+    {
+        return ((row == row1) && (column == column1 + 1 || column == column1 - 1)) || ((column == column1) && (row == row1 + 1 || (row == row1 - 1)));
     }
 }

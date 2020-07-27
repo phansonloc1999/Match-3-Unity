@@ -175,6 +175,7 @@ MonoBehaviour:
   - {fileID: 2091829175261615561, guid: a0ab4f36500f76c44b6aea9c0d390178, type: 3}
   - {fileID: 756911166660455246, guid: a0ab4f36500f76c44b6aea9c0d390178, type: 3}
   - {fileID: 403005533434085257, guid: a0ab4f36500f76c44b6aea9c0d390178, type: 3}
+  selectedCell: {fileID: 0}
 --- !u!1 &519420028
 GameObject:
   m_ObjectHideFlags: 0
@@ -228,7 +229,7 @@ Camera:
   far clip plane: 1000
   field of view: 60
   orthographic: 1
-  orthographic size: 5
+  orthographic size: 50
   m_Depth: -1
   m_CullingMask:
     serializedVersion: 2
