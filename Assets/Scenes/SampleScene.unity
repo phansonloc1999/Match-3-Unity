@@ -169,6 +169,12 @@ MonoBehaviour:
   NUM_OF_ROW: 5
   NUM_OF_COLUMN: 5
   cellPrefab: {fileID: 4582578369760367463, guid: 78b36e478f7f0fd40a26b08bedaef6a1, type: 3}
+  ELEMENT_SPRITES:
+  - {fileID: 8633881525917383573, guid: a0ab4f36500f76c44b6aea9c0d390178, type: 3}
+  - {fileID: -1771866121167276815, guid: a0ab4f36500f76c44b6aea9c0d390178, type: 3}
+  - {fileID: 2091829175261615561, guid: a0ab4f36500f76c44b6aea9c0d390178, type: 3}
+  - {fileID: 756911166660455246, guid: a0ab4f36500f76c44b6aea9c0d390178, type: 3}
+  - {fileID: 403005533434085257, guid: a0ab4f36500f76c44b6aea9c0d390178, type: 3}
 --- !u!1 &519420028
 GameObject:
   m_ObjectHideFlags: 0

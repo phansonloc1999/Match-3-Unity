@@ -9,6 +9,7 @@ public class Board : MonoBehaviour
 
     public GameObject cellPrefab;
 
+    public Sprite[] ELEMENT_SPRITES;
 
     // Start is called before the first frame update
     void Start()
@@ -34,5 +35,10 @@ public class Board : MonoBehaviour
     void Update()
     {
 
+    }
+
+    public Sprite[] getElementSprites()
+    {
+        return ELEMENT_SPRITES;
     }
 }
