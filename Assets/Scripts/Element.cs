@@ -1,9 +1,9 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-
 public class Element : MonoBehaviour
 {
+    [SerializeField]
     private int type;
 
     private SpriteRenderer spriteRenderer;
@@ -30,7 +30,8 @@ public class Element : MonoBehaviour
     public void setType(int type)
     {
         this.type = type;
-        spriteRenderer.sprite = boardScript.getElementSprite(type);
+        if (type == -1) spriteRenderer.sprite = null;
+        else spriteRenderer.sprite = boardScript.getElementSprite(type);
     }
 
     public int getType()
