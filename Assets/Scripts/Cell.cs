@@ -31,8 +31,15 @@ public class Cell : MonoBehaviour
     }
 
 
-    public void onSwapPosTweening(Vector3 endPos)
+    public void onSwapPosTweening(Vector3 endPos, int newSortingOrder)
     {
-        transform.DOMove(endPos, SWAPPING_DURATION);
+        transform.DOMove(endPos, SWAPPING_DURATION).SetEase(Ease.InOutExpo).OnComplete(() =>
+        {
+            GetComponent<SpriteRenderer>().sortingOrder = 0;
+            transform.GetChild(0).GetComponent<SpriteRenderer>().sortingOrder = 0;
+        });
+
+        GetComponent<SpriteRenderer>().sortingOrder = newSortingOrder;
+        transform.GetChild(0).GetComponent<SpriteRenderer>().sortingOrder = newSortingOrder;
     }
 }

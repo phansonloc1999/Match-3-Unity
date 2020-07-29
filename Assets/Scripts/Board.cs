@@ -92,8 +92,8 @@ public class Board : MonoBehaviour
                 cellsMatrix[selectedRow, selectedColumn] = targetCell;
                 cellsMatrix[targetRow, targetColumn] = selectedCell;
 
-                selectedCell.GetComponent<Cell>().onSwapPosTweening(targetCell.transform.position);
-                targetCell.GetComponent<Cell>().onSwapPosTweening(selectedCell.transform.position);
+                selectedCell.GetComponent<Cell>().onSwapPosTweening(targetCell.transform.position, 1);
+                targetCell.GetComponent<Cell>().onSwapPosTweening(selectedCell.transform.position, 2);
 
                 processMatches();
             }
@@ -199,6 +199,13 @@ public class Board : MonoBehaviour
                 totalMatches.Add(match);
             }
         }
+
+        StartCoroutine(genNewElements(Cell.SWAPPING_DURATION, totalMatches));
+    }
+
+    IEnumerator genNewElements(float time, List<CellPosition> totalMatches)
+    {
+        yield return new WaitForSeconds(time);
 
         foreach (var match in totalMatches)
         {
