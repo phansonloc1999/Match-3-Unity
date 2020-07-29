@@ -6,8 +6,7 @@ using System;
 
 public class Cell : MonoBehaviour
 {
-    [SerializeField]
-    private const float SWAPPING_DURATION = 1.0f;
+    public static float SWAPPING_DURATION = 1.0f;
 
     static Board boardScript = null;
 

@@ -63,27 +63,7 @@ public class Board : MonoBehaviour
 
     void Update()
     {
-        for (int row = 0; row < NUM_OF_ROW; row++)
-        {
-            List<CellPosition> matches = getRowMatchedPositions(row);
-            foreach (var match in matches)
-            {
-                var randomizedNewType = Random.Range(0, ELEMENT_SPRITES.Length);
-                cellsMatrix[match.row, match.column].transform.GetChild(0).GetComponent<Element>().setType(randomizedNewType);
-                elementTypesMatrix[match.row, match.column] = randomizedNewType;
-            }
-        }
 
-        for (int column = 0; column < NUM_OF_COLUMN; column++)
-        {
-            List<CellPosition> matches = getColumnMatchedPositions(column);
-            foreach (var match in matches)
-            {
-                var randomizedNewType = Random.Range(0, ELEMENT_SPRITES.Length);
-                cellsMatrix[match.row, match.column].transform.GetChild(0).GetComponent<Element>().setType(randomizedNewType);
-                elementTypesMatrix[match.row, match.column] = randomizedNewType;
-            }
-        }
     }
 
     public void onCellSelection(GameObject targetCell)
@@ -114,6 +94,8 @@ public class Board : MonoBehaviour
 
                 selectedCell.GetComponent<Cell>().onSwapPosTweening(targetCell.transform.position);
                 targetCell.GetComponent<Cell>().onSwapPosTweening(selectedCell.transform.position);
+
+                processMatches();
             }
 
             else Debug.Log("Selected cells are not neighbors");
@@ -194,5 +176,35 @@ public class Board : MonoBehaviour
             }
         }
         return matches;
+    }
+
+    void processMatches()
+    {
+        var totalMatches = new List<CellPosition>();
+
+        for (int row = 0; row < NUM_OF_ROW; row++)
+        {
+            List<CellPosition> matches = getRowMatchedPositions(row);
+            foreach (var match in matches)
+            {
+                totalMatches.Add(match);
+            }
+        }
+
+        for (int column = 0; column < NUM_OF_COLUMN; column++)
+        {
+            List<CellPosition> matches = getColumnMatchedPositions(column);
+            foreach (var match in matches)
+            {
+                totalMatches.Add(match);
+            }
+        }
+
+        foreach (var match in totalMatches)
+        {
+            var randomizedNewType = Random.Range(0, ELEMENT_SPRITES.Length);
+            cellsMatrix[match.row, match.column].transform.GetChild(0).GetComponent<Element>().setType(randomizedNewType);
+            elementTypesMatrix[match.row, match.column] = randomizedNewType;
+        }
     }
 }
