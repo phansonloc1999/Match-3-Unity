@@ -86,32 +86,37 @@ public class Board : MonoBehaviour
         }
     }
 
-    public void onCellSelection(GameObject target)
+    public void onCellSelection(GameObject targetCell)
     {
         if (selectedCell == null)
         {
-            selectedCell = target;
+            selectedCell = targetCell;
         }
         else
         {
             int selectedRow, selectedColumn, targetRow, targetColumn;
-            getCellPosition(target, out targetRow, out targetColumn);
+            getCellPosition(targetCell, out targetRow, out targetColumn);
             getCellPosition(selectedCell, out selectedRow, out selectedColumn);
 
             if (areNeighborCells(selectedRow, selectedColumn, targetRow, targetColumn))
             {
                 var selectedElementScript = selectedCell.GetComponentInChildren<Element>();
-                var targetElementScript = target.GetComponentInChildren<Element>();
+                var targetElementScript = targetCell.GetComponentInChildren<Element>();
 
-                // Updating swapped element game objects' element field and SpriteRenderer
+                // Swapping & updating elementTypesMatrix
                 var temp = selectedElementScript.getType();
-                selectedElementScript.setType(targetElementScript.getType());
-                targetElementScript.setType(temp);
-
-                // Swapping & updating element types matrix
                 elementTypesMatrix[selectedRow, selectedColumn] = elementTypesMatrix[targetRow, targetColumn];
                 elementTypesMatrix[targetRow, targetColumn] = temp;
+
+                // Swapping & updating cellsMatrix
+                cellsMatrix[selectedRow, selectedColumn] = targetCell;
+                cellsMatrix[targetRow, targetColumn] = selectedCell;
+
+                selectedCell.GetComponent<Cell>().onSwapPosTweening(targetCell.transform.position);
+                targetCell.GetComponent<Cell>().onSwapPosTweening(selectedCell.transform.position);
             }
+
+            else Debug.Log("Selected cells are not neighbors");
 
             selectedCell = null;
         }
