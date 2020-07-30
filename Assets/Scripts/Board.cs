@@ -20,6 +20,8 @@ public class Board : MonoBehaviour
     private GameObject[,] cellsMatrix;
     private int[,] elementTypesMatrix;
 
+    private static Board instance;
+
     private struct CellPosition
     {
         public int row;
@@ -35,6 +37,8 @@ public class Board : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
+        instance = this;
+
         SpriteRenderer renderer = cellPrefab.GetComponent<SpriteRenderer>();
         CELL_WIDTH = renderer.bounds.size.x;
         CELL_HEIGHT = renderer.bounds.size.y;
@@ -74,33 +78,7 @@ public class Board : MonoBehaviour
         }
         else
         {
-            int selectedRow, selectedColumn, targetRow, targetColumn;
-            getCellPosition(targetCell, out targetRow, out targetColumn);
-            getCellPosition(selectedCell, out selectedRow, out selectedColumn);
-
-            if (areNeighborCells(selectedRow, selectedColumn, targetRow, targetColumn))
-            {
-                var selectedElementScript = selectedCell.GetComponentInChildren<Element>();
-                var targetElementScript = targetCell.GetComponentInChildren<Element>();
-
-                // Swapping & updating elementTypesMatrix
-                var temp = selectedElementScript.getType();
-                elementTypesMatrix[selectedRow, selectedColumn] = elementTypesMatrix[targetRow, targetColumn];
-                elementTypesMatrix[targetRow, targetColumn] = temp;
-
-                // Swapping & updating cellsMatrix
-                cellsMatrix[selectedRow, selectedColumn] = targetCell;
-                cellsMatrix[targetRow, targetColumn] = selectedCell;
-
-                selectedCell.GetComponent<Cell>().onSwapPosTweening(targetCell.transform.position, 1);
-                targetCell.GetComponent<Cell>().onSwapPosTweening(selectedCell.transform.position, 2);
-
-                processMatches();
-            }
-
-            else Debug.Log("Selected cells are not neighbors");
-
-            selectedCell = null;
+            swappingCells(targetCell);
         }
     }
 
@@ -178,7 +156,7 @@ public class Board : MonoBehaviour
         return matches;
     }
 
-    void processMatches()
+    List<CellPosition> getTotalMatchedPositions()
     {
         var totalMatches = new List<CellPosition>();
 
@@ -200,7 +178,38 @@ public class Board : MonoBehaviour
             }
         }
 
-        StartCoroutine(genNewElements(Cell.SWAPPING_DURATION, totalMatches));
+        return totalMatches;
+    }
+
+    void swappingCells(GameObject targetCell)
+    {
+        int selectedRow, selectedColumn, targetRow, targetColumn;
+        getCellPosition(targetCell, out targetRow, out targetColumn);
+        getCellPosition(selectedCell, out selectedRow, out selectedColumn);
+
+        if (areNeighborCells(selectedRow, selectedColumn, targetRow, targetColumn))
+        {
+            var selectedElementScript = selectedCell.GetComponentInChildren<Element>();
+            var targetElementScript = targetCell.GetComponentInChildren<Element>();
+
+            // Swapping & updating elementTypesMatrix
+            var temp = selectedElementScript.getType();
+            elementTypesMatrix[selectedRow, selectedColumn] = elementTypesMatrix[targetRow, targetColumn];
+            elementTypesMatrix[targetRow, targetColumn] = temp;
+
+            // Swapping & updating cellsMatrix
+            cellsMatrix[selectedRow, selectedColumn] = targetCell;
+            cellsMatrix[targetRow, targetColumn] = selectedCell;
+
+            selectedCell.GetComponent<Cell>().onSwapPosTweening(targetCell.transform.position, 1);
+            targetCell.GetComponent<Cell>().onSwapPosTweening(selectedCell.transform.position, 2);
+
+            StartCoroutine(onSwappingComplete(Cell.SWAPPING_DURATION, targetCell));
+        }
+        else
+        {
+            selectedCell = null;
+        }
     }
 
     IEnumerator genNewElements(float time, List<CellPosition> totalMatches)
@@ -212,6 +221,62 @@ public class Board : MonoBehaviour
             var randomizedNewType = Random.Range(0, ELEMENT_SPRITES.Length);
             cellsMatrix[match.row, match.column].transform.GetChild(0).GetComponent<Element>().setType(randomizedNewType);
             elementTypesMatrix[match.row, match.column] = randomizedNewType;
+        }
+    }
+
+    IEnumerator onSwappingComplete(float time, GameObject targetCell)
+    {
+        yield return new WaitForSeconds(time);
+
+        var totalMatches = getTotalMatchedPositions();
+
+        if (totalMatches.Count > 0)
+        {
+            StartCoroutine(genNewElements(Cell.SWAPPING_DURATION, totalMatches));
+        }
+        else
+        {
+            int selectedRow, selectedColumn, targetRow, targetColumn;
+            getCellPosition(targetCell, out targetRow, out targetColumn);
+            getCellPosition(selectedCell, out selectedRow, out selectedColumn);
+
+            var selectedElementScript = selectedCell.GetComponentInChildren<Element>();
+            var targetElementScript = targetCell.GetComponentInChildren<Element>();
+
+            // Swapping & updating elementTypesMatrix
+            var temp = selectedElementScript.getType();
+            elementTypesMatrix[selectedRow, selectedColumn] = elementTypesMatrix[targetRow, targetColumn];
+            elementTypesMatrix[targetRow, targetColumn] = temp;
+
+            // Swapping & updating cellsMatrix
+            cellsMatrix[selectedRow, selectedColumn] = targetCell;
+            cellsMatrix[targetRow, targetColumn] = selectedCell;
+
+            selectedCell.GetComponent<Cell>().onSwapPosTweening(targetCell.transform.position, 1);
+            targetCell.GetComponent<Cell>().onSwapPosTweening(selectedCell.transform.position, 2);
+        }
+
+        selectedCell = null;
+    }
+
+    public static Board getInstance()
+    {
+        return instance;
+    }
+
+
+    public void updateElementTypesMatrix(GameObject changedCell, int changedCellElementType)
+    {
+        for (int row = 0; row < NUM_OF_ROW; row++)
+        {
+            for (int column = 0; column < NUM_OF_COLUMN; column++)
+            {
+                if (changedCell == cellsMatrix[row, column])
+                {
+                    elementTypesMatrix[row, column] = changedCellElementType;
+                    return;
+                }
+            }
         }
     }
 }

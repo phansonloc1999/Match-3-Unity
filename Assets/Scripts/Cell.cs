@@ -30,6 +30,17 @@ public class Cell : MonoBehaviour
         boardScript.onCellSelection(gameObject);
     }
 
+    private void OnMouseOver()
+    {
+        if (Input.GetMouseButtonDown(1))
+        {
+            var oldType = GetComponentInChildren<Element>().getType();
+            var newType = oldType < Board.getInstance().ELEMENT_SPRITES.Length - 1 ? oldType + 1 : 0;
+            GetComponentInChildren<Element>().setType(newType);
+
+            Board.getInstance().updateElementTypesMatrix(gameObject, newType);
+        }
+    }
 
     public void onSwapPosTweening(Vector3 endPos, int newSortingOrder)
     {
