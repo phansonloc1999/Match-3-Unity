@@ -6,8 +6,9 @@ public class Board : MonoBehaviour
 {
     public int NUM_OF_ROW;
     public int NUM_OF_COLUMN;
-    private float CELL_WIDTH;
-    private float CELL_HEIGHT;
+    private static float CELL_WIDTH;
+    private static float CELL_HEIGHT;
+    private const float GEN_ELEMENTS_INTERVAL = 1.0f;
 
 
     public GameObject cellPrefab;
@@ -62,12 +63,6 @@ public class Board : MonoBehaviour
         }
 
         selectedCell = null;
-    }
-
-
-    void Update()
-    {
-
     }
 
     public void onCellSelection(GameObject targetCell)
@@ -181,7 +176,7 @@ public class Board : MonoBehaviour
         return totalMatches;
     }
 
-    void swappingCells(GameObject targetCell)
+    private void swappingCells(GameObject targetCell)
     {
         int selectedRow, selectedColumn, targetRow, targetColumn;
         getCellPosition(targetCell, out targetRow, out targetColumn);
@@ -212,19 +207,35 @@ public class Board : MonoBehaviour
         }
     }
 
-    IEnumerator genNewElements(float time, List<CellPosition> totalMatches)
+    private IEnumerator shiftDownAndRegenElements(float time, List<CellPosition> totalMatches)
     {
         yield return new WaitForSeconds(time);
 
+        // Set all matches' element type to -1
         foreach (var match in totalMatches)
         {
-            var randomizedNewType = Random.Range(0, ELEMENT_SPRITES.Length);
-            cellsMatrix[match.row, match.column].transform.GetChild(0).GetComponent<Element>().setType(randomizedNewType);
-            elementTypesMatrix[match.row, match.column] = randomizedNewType;
+            cellsMatrix[match.row, match.column].transform.GetChild(0).GetComponent<Element>().setType(-1);
+            elementTypesMatrix[match.row, match.column] = -1;
+        }
+
+        shiftElementsDown();
+
+        // Regen elements
+        for (int row = 0; row < NUM_OF_ROW; row++)
+        {
+            for (int column = 0; column < NUM_OF_COLUMN; column++)
+            {
+                if (elementTypesMatrix[row, column] == -1)
+                {
+                    var randomElementType = Random.Range(0, ELEMENT_SPRITES.Length);
+                    elementTypesMatrix[row, column] = randomElementType;
+                    cellsMatrix[row, column].GetComponentInChildren<Element>().setType(randomElementType);
+                }
+            }
         }
     }
 
-    IEnumerator onSwappingComplete(float time, GameObject targetCell)
+    private IEnumerator onSwappingComplete(float time, GameObject targetCell)
     {
         yield return new WaitForSeconds(time);
 
@@ -232,7 +243,7 @@ public class Board : MonoBehaviour
 
         if (totalMatches.Count > 0)
         {
-            StartCoroutine(genNewElements(Cell.SWAPPING_DURATION, totalMatches));
+            StartCoroutine(shiftDownAndRegenElements(GEN_ELEMENTS_INTERVAL, totalMatches));
         }
         else
         {
@@ -264,7 +275,6 @@ public class Board : MonoBehaviour
         return instance;
     }
 
-
     public void updateElementTypesMatrix(GameObject changedCell, int changedCellElementType)
     {
         for (int row = 0; row < NUM_OF_ROW; row++)
@@ -275,6 +285,28 @@ public class Board : MonoBehaviour
                 {
                     elementTypesMatrix[row, column] = changedCellElementType;
                     return;
+                }
+            }
+        }
+    }
+
+    private void shiftElementsDown()
+    {
+        for (int row = NUM_OF_ROW - 2; row >= 0; row--)
+        {
+            for (int column = 0; column < NUM_OF_COLUMN; column++)
+            {
+                if (elementTypesMatrix[row, column] != -1)
+                {
+                    int shiftedRow = row;
+                    while (shiftedRow <= NUM_OF_ROW - 2 && elementTypesMatrix[shiftedRow + 1, column] == -1)
+                    {
+                        elementTypesMatrix[shiftedRow + 1, column] = elementTypesMatrix[shiftedRow, column];
+                        elementTypesMatrix[shiftedRow, column] = -1;
+                        cellsMatrix[shiftedRow, column].GetComponentInChildren<Element>().setType(-1);
+                        cellsMatrix[shiftedRow + 1, column].GetComponentInChildren<Element>().setType(elementTypesMatrix[shiftedRow + 1, column]);
+                        shiftedRow++;
+                    }
                 }
             }
         }

@@ -10,6 +10,8 @@ public class Cell : MonoBehaviour
 
     static Board boardScript = null;
 
+    private Element elementScript;
+
     // Start is called before the first frame update
     void Start()
     {
@@ -17,6 +19,7 @@ public class Cell : MonoBehaviour
         {
             boardScript = GameObject.Find("Board").GetComponent<Board>();
         }
+        elementScript = GetComponentInChildren<Element>();
     }
 
     // Update is called once per frame
@@ -34,23 +37,24 @@ public class Cell : MonoBehaviour
     {
         if (Input.GetMouseButtonDown(1))
         {
-            var oldType = GetComponentInChildren<Element>().getType();
+            var oldType = elementScript.getType();
             var newType = oldType < Board.getInstance().ELEMENT_SPRITES.Length - 1 ? oldType + 1 : 0;
-            GetComponentInChildren<Element>().setType(newType);
+            elementScript.setType(newType);
 
             Board.getInstance().updateElementTypesMatrix(gameObject, newType);
         }
     }
 
-    public void onSwapPosTweening(Vector3 endPos, int newSortingOrder)
+    public void onSwapPosTweening(Vector3 swapEndPos, int newSortingOrder)
     {
-        transform.DOMove(endPos, SWAPPING_DURATION).SetEase(Ease.InOutExpo).OnComplete(() =>
+        // Tweening this transform position to swapEndPosition
+        transform.DOMove(swapEndPos, SWAPPING_DURATION).SetEase(Ease.InOutExpo).OnComplete(() =>
         {
             GetComponent<SpriteRenderer>().sortingOrder = 0;
-            transform.GetChild(0).GetComponent<SpriteRenderer>().sortingOrder = 0;
+            elementScript.setSortingOrder(1);
         });
 
-        GetComponent<SpriteRenderer>().sortingOrder = newSortingOrder;
-        transform.GetChild(0).GetComponent<SpriteRenderer>().sortingOrder = newSortingOrder;
+        GetComponent<SpriteRenderer>().sortingOrder = newSortingOrder - 1; // Cell's sorting layer has to be behind element's.
+        elementScript.setSortingOrder(newSortingOrder);
     }
 }

@@ -39,4 +39,9 @@ public class Element : MonoBehaviour
     {
         return this.type;
     }
+
+    public void setSortingOrder(int order)
+    {
+        spriteRenderer.sortingOrder = order;
+    }
 }
