@@ -8,7 +8,9 @@ public class Board : MonoBehaviour
     public int NUM_OF_COLUMN;
     private static float CELL_WIDTH;
     private static float CELL_HEIGHT;
+    private const float BOARD_Y = -20f;
     private const float GEN_ELEMENTS_INTERVAL = 1.0f;
+    public const float CELL_SHIFTING_DOWN_DURATION = 2.0f;
 
 
     public GameObject cellPrefab;
@@ -44,7 +46,7 @@ public class Board : MonoBehaviour
         CELL_WIDTH = renderer.bounds.size.x;
         CELL_HEIGHT = renderer.bounds.size.y;
 
-        transform.position = new Vector3(-NUM_OF_COLUMN * CELL_WIDTH / 2, NUM_OF_ROW * CELL_HEIGHT / 2, transform.position.z);
+        transform.position = new Vector3(-NUM_OF_COLUMN * CELL_WIDTH / 2, BOARD_Y + NUM_OF_ROW * CELL_HEIGHT / 2, transform.position.z);
 
         cellsMatrix = new GameObject[NUM_OF_ROW, NUM_OF_COLUMN];
         elementTypesMatrix = new int[NUM_OF_ROW, NUM_OF_COLUMN];
@@ -207,6 +209,26 @@ public class Board : MonoBehaviour
         }
     }
 
+    private IEnumerator regenNewElements(float time)
+    {
+        yield return new WaitForSeconds(time);
+
+        for (int row = 0; row < NUM_OF_ROW; row++)
+        {
+            for (int column = 0; column < NUM_OF_COLUMN; column++)
+            {
+                if (elementTypesMatrix[row, column] == -1)
+                {
+                    var randomElementType = Random.Range(0, ELEMENT_SPRITES.Length);
+                    elementTypesMatrix[row, column] = randomElementType;
+                    cellsMatrix[row, column].GetComponentInChildren<Element>().setType(randomElementType);
+
+                    cellsMatrix[row, column].GetComponent<Cell>().onRegenNewElement();
+                }
+            }
+        }
+    }
+
     private IEnumerator shiftDownAndRegenElements(float time, List<CellPosition> totalMatches)
     {
         yield return new WaitForSeconds(time);
@@ -220,19 +242,7 @@ public class Board : MonoBehaviour
 
         shiftElementsDown();
 
-        // Regen elements
-        for (int row = 0; row < NUM_OF_ROW; row++)
-        {
-            for (int column = 0; column < NUM_OF_COLUMN; column++)
-            {
-                if (elementTypesMatrix[row, column] == -1)
-                {
-                    var randomElementType = Random.Range(0, ELEMENT_SPRITES.Length);
-                    elementTypesMatrix[row, column] = randomElementType;
-                    cellsMatrix[row, column].GetComponentInChildren<Element>().setType(randomElementType);
-                }
-            }
-        }
+        StartCoroutine(regenNewElements(CELL_SHIFTING_DOWN_DURATION));
     }
 
     private IEnumerator onSwappingComplete(float time, GameObject targetCell)
@@ -299,13 +309,23 @@ public class Board : MonoBehaviour
                 if (elementTypesMatrix[row, column] != -1)
                 {
                     int shiftedRow = row;
+                    bool shifted = false;
                     while (shiftedRow <= NUM_OF_ROW - 2 && elementTypesMatrix[shiftedRow + 1, column] == -1)
                     {
+                        shifted = true;
+
                         elementTypesMatrix[shiftedRow + 1, column] = elementTypesMatrix[shiftedRow, column];
                         elementTypesMatrix[shiftedRow, column] = -1;
                         cellsMatrix[shiftedRow, column].GetComponentInChildren<Element>().setType(-1);
                         cellsMatrix[shiftedRow + 1, column].GetComponentInChildren<Element>().setType(elementTypesMatrix[shiftedRow + 1, column]);
                         shiftedRow++;
+                    }
+
+                    // Only set element's position to if element is shifted
+                    if (shifted)
+                    {
+                        var currentCellObj = cellsMatrix[shiftedRow, column];
+                        currentCellObj.GetComponentInChildren<Cell>().onShiftingDown();
                     }
                 }
             }

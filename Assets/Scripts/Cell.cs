@@ -57,4 +57,20 @@ public class Cell : MonoBehaviour
         GetComponent<SpriteRenderer>().sortingOrder = newSortingOrder - 1; // Cell's sorting layer has to be behind element's.
         elementScript.setSortingOrder(newSortingOrder);
     }
+
+    public void onShiftingDown()
+    {
+        var endPos = transform.position;
+        transform.position = new Vector3(transform.position.x, transform.position.y + 20, transform.position.z);
+
+        transform.DOMove(endPos, Board.CELL_SHIFTING_DOWN_DURATION);
+    }
+
+    public void onRegenNewElement()
+    {
+        var endPos = transform.position;
+        transform.position = new Vector3(transform.position.x, transform.position.y + 20, transform.position.z);
+
+        transform.DOMove(endPos, Board.CELL_SHIFTING_DOWN_DURATION);
+    }
 }
