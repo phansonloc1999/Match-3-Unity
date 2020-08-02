@@ -58,18 +58,17 @@ public class Cell : MonoBehaviour
         elementScript.setSortingOrder(newSortingOrder);
     }
 
-    public void onShiftingDown()
+    public void onShiftingDown(Vector3 shiftStartPos)
     {
         var endPos = transform.position;
-        transform.position = new Vector3(transform.position.x, transform.position.y + 20, transform.position.z);
+        transform.position = shiftStartPos;
 
         transform.DOMove(endPos, Board.CELL_SHIFTING_DOWN_DURATION);
     }
 
     public void onRegenNewElement()
     {
-        var endPos = transform.position;
-        transform.position = new Vector3(transform.position.x, transform.position.y + 20, transform.position.z);
+        var endPos = new Vector3(transform.position.x, transform.position.y, transform.position.z);
 
         transform.DOMove(endPos, Board.CELL_SHIFTING_DOWN_DURATION);
     }

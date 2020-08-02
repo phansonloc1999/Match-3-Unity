@@ -1,6 +1,7 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.Events;
 
 public class Board : MonoBehaviour
 {
@@ -10,7 +11,7 @@ public class Board : MonoBehaviour
     private static float CELL_HEIGHT;
     private const float BOARD_Y = -20f;
     private const float GEN_ELEMENTS_INTERVAL = 1.0f;
-    public const float CELL_SHIFTING_DOWN_DURATION = 2.0f;
+    public const float CELL_SHIFTING_DOWN_DURATION = 0.5f;
 
 
     public GameObject cellPrefab;
@@ -209,7 +210,7 @@ public class Board : MonoBehaviour
         }
     }
 
-    private IEnumerator regenNewElements(float time)
+    private IEnumerator regenNewElements(float time, UnityAction callback)
     {
         yield return new WaitForSeconds(time);
 
@@ -227,6 +228,8 @@ public class Board : MonoBehaviour
                 }
             }
         }
+
+        callback();
     }
 
     private IEnumerator shiftDownAndRegenElements(float time, List<CellPosition> totalMatches)
@@ -242,7 +245,12 @@ public class Board : MonoBehaviour
 
         shiftElementsDown();
 
-        StartCoroutine(regenNewElements(CELL_SHIFTING_DOWN_DURATION));
+        StartCoroutine(regenNewElements(CELL_SHIFTING_DOWN_DURATION, () =>
+        {
+            var totalMaches = getTotalMatchedPositions();
+            // If board has generated new matches
+            if (totalMatches.Count > 0) StartCoroutine(shiftDownAndRegenElements(GEN_ELEMENTS_INTERVAL, totalMaches));
+        }));
     }
 
     private IEnumerator onSwappingComplete(float time, GameObject targetCell)
@@ -325,10 +333,30 @@ public class Board : MonoBehaviour
                     if (shifted)
                     {
                         var currentCellObj = cellsMatrix[shiftedRow, column];
-                        currentCellObj.GetComponentInChildren<Cell>().onShiftingDown();
+                        var shiftStartPos = cellsMatrix[row, column].transform.position;
+                        currentCellObj.GetComponentInChildren<Cell>().onShiftingDown(shiftStartPos);
                     }
                 }
             }
         }
+
+        for (int row = NUM_OF_ROW - 2; row >= 0; row--)
+        {
+            for (int column = 0; column < NUM_OF_COLUMN; column++)
+            {
+                if (elementTypesMatrix[row, column] == -1)
+                {
+                    cellsMatrix[row, column].SetActive(false);
+                    StartCoroutine(onShiftingDownComplete(CELL_SHIFTING_DOWN_DURATION, cellsMatrix[row, column]));
+                }
+            }
+        }
+    }
+
+    private IEnumerator onShiftingDownComplete(float time, GameObject cell)
+    {
+        yield return new WaitForSeconds(time);
+
+        cell.SetActive(true);
     }
 }
