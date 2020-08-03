@@ -3,7 +3,19 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Events;
 
-public class Board : MonoBehaviour
+struct CellPosition
+{
+    public int row;
+    public int column;
+
+    public CellPosition(int row, int column)
+    {
+        this.row = row;
+        this.column = column;
+    }
+}
+
+public partial class Board : MonoBehaviour
 {
     public int NUM_OF_ROW;
     public int NUM_OF_COLUMN;
@@ -20,25 +32,11 @@ public class Board : MonoBehaviour
     [SerializeField]
     private GameObject selectedCell;
 
-
     private GameObject[,] cellsMatrix;
     private int[,] elementTypesMatrix;
 
     private static Board instance;
 
-    private struct CellPosition
-    {
-        public int row;
-        public int column;
-
-        public CellPosition(int row, int column)
-        {
-            this.row = row;
-            this.column = column;
-        }
-    }
-
-    // Start is called before the first frame update
     void Start()
     {
         instance = this;
@@ -81,179 +79,6 @@ public class Board : MonoBehaviour
         }
     }
 
-    public Sprite getElementSprite(int index)
-    {
-        return ELEMENT_SPRITES[index];
-    }
-
-    private bool areNeighborCells(int row, int column, int row1, int column1)
-    {
-        return ((row == row1) && (column == column1 + 1 || column == column1 - 1)) || ((column == column1) && (row == row1 + 1 || (row == row1 - 1)));
-    }
-
-    private void getCellPosition(GameObject cell, out int outRow, out int outColumn)
-    {
-        for (int row = 0; row < NUM_OF_ROW; row++)
-        {
-            for (int column = 0; column < NUM_OF_COLUMN; column++)
-            {
-                if (cell == cellsMatrix[row, column])
-                {
-                    outRow = row;
-                    outColumn = column;
-                    return;
-                }
-            }
-        }
-        outRow = -1;
-        outColumn = -1;
-    }
-
-    private List<CellPosition> getRowMatchedPositions(int row)
-    {
-        var matches = new List<CellPosition>();
-        for (int column = 0; column < NUM_OF_COLUMN; column++)
-        {
-            int matchedElementCount = 0, i = column + 1;
-            while (i < NUM_OF_COLUMN && elementTypesMatrix[row, column] == elementTypesMatrix[row, i])
-            {
-                matchedElementCount++;
-                i++;
-            }
-
-            if (matchedElementCount >= 2)
-            {
-                for (int j = column; j < i; j++)
-                {
-                    matches.Add(new CellPosition(row, j));
-                }
-            }
-        }
-        return matches;
-    }
-
-    private List<CellPosition> getColumnMatchedPositions(int column)
-    {
-        var matches = new List<CellPosition>();
-        for (int row = 0; row < NUM_OF_ROW; row++)
-        {
-            int matchedElementCount = 0, i = row + 1;
-            while (i < NUM_OF_ROW && elementTypesMatrix[row, column] == elementTypesMatrix[i, column])
-            {
-                matchedElementCount++;
-                i++;
-            }
-
-            if (matchedElementCount >= 2)
-            {
-                for (int j = row; j < i; j++)
-                {
-                    matches.Add(new CellPosition(j, column));
-                }
-            }
-        }
-        return matches;
-    }
-
-    List<CellPosition> getTotalMatchedPositions()
-    {
-        var totalMatches = new List<CellPosition>();
-
-        for (int row = 0; row < NUM_OF_ROW; row++)
-        {
-            List<CellPosition> matches = getRowMatchedPositions(row);
-            foreach (var match in matches)
-            {
-                totalMatches.Add(match);
-            }
-        }
-
-        for (int column = 0; column < NUM_OF_COLUMN; column++)
-        {
-            List<CellPosition> matches = getColumnMatchedPositions(column);
-            foreach (var match in matches)
-            {
-                totalMatches.Add(match);
-            }
-        }
-
-        return totalMatches;
-    }
-
-    private void swappingCells(GameObject targetCell)
-    {
-        int selectedRow, selectedColumn, targetRow, targetColumn;
-        getCellPosition(targetCell, out targetRow, out targetColumn);
-        getCellPosition(selectedCell, out selectedRow, out selectedColumn);
-
-        if (areNeighborCells(selectedRow, selectedColumn, targetRow, targetColumn))
-        {
-            var selectedElementScript = selectedCell.GetComponentInChildren<Element>();
-            var targetElementScript = targetCell.GetComponentInChildren<Element>();
-
-            // Swapping & updating elementTypesMatrix
-            var temp = selectedElementScript.getType();
-            elementTypesMatrix[selectedRow, selectedColumn] = elementTypesMatrix[targetRow, targetColumn];
-            elementTypesMatrix[targetRow, targetColumn] = temp;
-
-            // Swapping & updating cellsMatrix
-            cellsMatrix[selectedRow, selectedColumn] = targetCell;
-            cellsMatrix[targetRow, targetColumn] = selectedCell;
-
-            selectedCell.GetComponent<Cell>().onSwapPosTweening(targetCell.transform.position, 1);
-            targetCell.GetComponent<Cell>().onSwapPosTweening(selectedCell.transform.position, 2);
-
-            StartCoroutine(onSwappingComplete(Cell.SWAPPING_DURATION, targetCell));
-        }
-        else
-        {
-            ignoringUserInput = false;
-            selectedCell = null;
-        }
-    }
-
-    private void regenNewElements()
-    {
-        for (int row = 0; row < NUM_OF_ROW; row++)
-        {
-            for (int column = 0; column < NUM_OF_COLUMN; column++)
-            {
-                if (elementTypesMatrix[row, column] == -1)
-                {
-                    var randomElementType = Random.Range(0, ELEMENT_SPRITES.Length);
-                    elementTypesMatrix[row, column] = randomElementType;
-                    cellsMatrix[row, column].GetComponentInChildren<Element>().setType(randomElementType);
-
-                    cellsMatrix[row, column].GetComponent<Cell>().onRegenNewElement();
-                }
-            }
-        }
-
-        var totalMatches = getTotalMatchedPositions();
-        // If board has generated new matches
-        if (totalMatches.Count > 0) StartCoroutine(shiftDownAndRegenElements(GEN_ELEMENTS_INTERVAL, totalMatches));
-        else
-        {
-            ignoringUserInput = false;
-        }
-    }
-
-    private IEnumerator shiftDownAndRegenElements(float time, List<CellPosition> totalMatches)
-    {
-        yield return new WaitForSeconds(time);
-
-        // Set all matches' element type to -1
-        foreach (var match in totalMatches)
-        {
-            cellsMatrix[match.row, match.column].transform.GetChild(0).GetComponent<Element>().setType(-1);
-            elementTypesMatrix[match.row, match.column] = -1;
-        }
-
-        shiftElementsDown();
-
-        regenNewElements();
-    }
-
     private IEnumerator onSwappingComplete(float time, GameObject targetCell)
     {
         yield return new WaitForSeconds(time);
@@ -293,80 +118,10 @@ public class Board : MonoBehaviour
         selectedCell = null;
     }
 
-    public static Board getInstance()
-    {
-        return instance;
-    }
-
-    public void updateElementTypesMatrix(GameObject changedCell, int changedCellElementType)
-    {
-        for (int row = 0; row < NUM_OF_ROW; row++)
-        {
-            for (int column = 0; column < NUM_OF_COLUMN; column++)
-            {
-                if (changedCell == cellsMatrix[row, column])
-                {
-                    elementTypesMatrix[row, column] = changedCellElementType;
-                    return;
-                }
-            }
-        }
-    }
-
-    private void shiftElementsDown()
-    {
-        for (int row = NUM_OF_ROW - 2; row >= 0; row--)
-        {
-            for (int column = 0; column < NUM_OF_COLUMN; column++)
-            {
-                if (elementTypesMatrix[row, column] != -1)
-                {
-                    int shiftedRow = row;
-                    bool shifted = false;
-                    while (shiftedRow <= NUM_OF_ROW - 2 && elementTypesMatrix[shiftedRow + 1, column] == -1)
-                    {
-                        shifted = true;
-
-                        elementTypesMatrix[shiftedRow + 1, column] = elementTypesMatrix[shiftedRow, column];
-                        elementTypesMatrix[shiftedRow, column] = -1;
-                        cellsMatrix[shiftedRow, column].GetComponentInChildren<Element>().setType(-1);
-                        cellsMatrix[shiftedRow + 1, column].GetComponentInChildren<Element>().setType(elementTypesMatrix[shiftedRow + 1, column]);
-                        shiftedRow++;
-                    }
-
-                    // Only set element's position to if element is shifted
-                    if (shifted)
-                    {
-                        var currentCellObj = cellsMatrix[shiftedRow, column];
-                        var shiftStartPos = cellsMatrix[row, column].transform.position;
-                        currentCellObj.GetComponentInChildren<Cell>().onShiftingDown(shiftStartPos);
-                    }
-                }
-            }
-        }
-
-        for (int row = NUM_OF_ROW - 2; row >= 0; row--)
-        {
-            for (int column = 0; column < NUM_OF_COLUMN; column++)
-            {
-                if (elementTypesMatrix[row, column] == -1)
-                {
-                    cellsMatrix[row, column].SetActive(false);
-                    StartCoroutine(onShiftingDownComplete(CELL_SHIFTING_DOWN_DURATION, cellsMatrix[row, column]));
-                }
-            }
-        }
-    }
-
     private IEnumerator onShiftingDownComplete(float time, GameObject cell)
     {
         yield return new WaitForSeconds(time);
 
         cell.SetActive(true);
-    }
-
-    public static bool isIgnoringUserInput()
-    {
-        return ignoringUserInput;
     }
 }
