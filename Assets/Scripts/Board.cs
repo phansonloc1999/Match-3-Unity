@@ -75,7 +75,7 @@ public partial class Board : MonoBehaviour
         else
         {
             ignoringUserInput = true;
-            swappingCells(targetCell);
+            swappingElements(targetCell);
         }
     }
 

@@ -4,7 +4,10 @@ using UnityEngine;
 
 public partial class Board
 {
-    private void swappingCells(GameObject targetCell)
+    /// <summary>
+    /// Swapping 2 elements of selected neighbor cells
+    /// </summary>
+    private void swappingElements(GameObject targetCell)
     {
         int selectedRow, selectedColumn, targetRow, targetColumn;
         getCellPosition(targetCell, out targetRow, out targetColumn);
@@ -36,6 +39,9 @@ public partial class Board
         }
     }
 
+    /// <summary>
+    /// Regenerate new randomized elements at empty positions after matching
+    /// </summary>
     private void regenNewElements()
     {
         for (int row = 0; row < NUM_OF_ROW; row++)
@@ -62,6 +68,12 @@ public partial class Board
         }
     }
 
+    /// <summary>
+    /// Shifting down and regenerating elements
+    /// </summary>
+    /// <param name="time"></param>
+    /// <param name="totalMatches"></param>
+    /// <returns></returns>
     private IEnumerator shiftDownAndRegenElements(float time, List<CellPosition> totalMatches)
     {
         yield return new WaitForSeconds(time);
@@ -78,6 +90,11 @@ public partial class Board
         regenNewElements();
     }
 
+    /// <summary>
+    /// Search & update changed element in elementTypesMatrix
+    /// </summary>
+    /// <param name="changedCell"></param>
+    /// <param name="changedCellElementType"></param>
     public void updateElementTypesMatrix(GameObject changedCell, int changedCellElementType)
     {
         for (int row = 0; row < NUM_OF_ROW; row++)
@@ -93,6 +110,10 @@ public partial class Board
         }
     }
 
+
+    /// <summary>
+    /// Shifting elements down
+    /// </summary>
     private void shiftElementsDown()
     {
         for (int row = NUM_OF_ROW - 2; row >= 0; row--)
@@ -125,6 +146,7 @@ public partial class Board
             }
         }
 
+        // Disable empty cell objects to make them invisible until shifting down is done
         for (int row = NUM_OF_ROW - 2; row >= 0; row--)
         {
             for (int column = 0; column < NUM_OF_COLUMN; column++)
