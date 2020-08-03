@@ -30,7 +30,7 @@ public class Cell : MonoBehaviour
 
     private void OnMouseDown()
     {
-        boardScript.onCellSelection(gameObject);
+        if (!Board.isIgnoringUserInput()) boardScript.onCellSelection(gameObject);
     }
 
     private void OnMouseOver()

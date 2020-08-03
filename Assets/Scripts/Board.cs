@@ -12,7 +12,7 @@ public class Board : MonoBehaviour
     private const float BOARD_Y = -20f;
     private const float GEN_ELEMENTS_INTERVAL = 1.0f;
     public const float CELL_SHIFTING_DOWN_DURATION = 0.5f;
-
+    private static bool ignoringUserInput = false;
 
     public GameObject cellPrefab;
     public Sprite[] ELEMENT_SPRITES;
@@ -76,6 +76,7 @@ public class Board : MonoBehaviour
         }
         else
         {
+            ignoringUserInput = true;
             swappingCells(targetCell);
         }
     }
@@ -207,6 +208,7 @@ public class Board : MonoBehaviour
         else
         {
             selectedCell = null;
+            ignoringUserInput = false;
         }
     }
 
@@ -250,6 +252,7 @@ public class Board : MonoBehaviour
             var totalMaches = getTotalMatchedPositions();
             // If board has generated new matches
             if (totalMatches.Count > 0) StartCoroutine(shiftDownAndRegenElements(GEN_ELEMENTS_INTERVAL, totalMaches));
+            else ignoringUserInput = false;
         }));
     }
 
@@ -283,6 +286,8 @@ public class Board : MonoBehaviour
 
             selectedCell.GetComponent<Cell>().onSwapPosTweening(targetCell.transform.position, 1);
             targetCell.GetComponent<Cell>().onSwapPosTweening(selectedCell.transform.position, 2);
+
+            ignoringUserInput = false;
         }
 
         selectedCell = null;
@@ -358,5 +363,10 @@ public class Board : MonoBehaviour
         yield return new WaitForSeconds(time);
 
         cell.SetActive(true);
+    }
+
+    public static bool isIgnoringUserInput()
+    {
+        return ignoringUserInput;
     }
 }
