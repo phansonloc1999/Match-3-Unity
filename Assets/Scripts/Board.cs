@@ -207,15 +207,13 @@ public class Board : MonoBehaviour
         }
         else
         {
-            selectedCell = null;
             ignoringUserInput = false;
+            selectedCell = null;
         }
     }
 
-    private IEnumerator regenNewElements(float time, UnityAction callback)
+    private void regenNewElements()
     {
-        yield return new WaitForSeconds(time);
-
         for (int row = 0; row < NUM_OF_ROW; row++)
         {
             for (int column = 0; column < NUM_OF_COLUMN; column++)
@@ -231,7 +229,13 @@ public class Board : MonoBehaviour
             }
         }
 
-        callback();
+        var totalMatches = getTotalMatchedPositions();
+        // If board has generated new matches
+        if (totalMatches.Count > 0) StartCoroutine(shiftDownAndRegenElements(GEN_ELEMENTS_INTERVAL, totalMatches));
+        else
+        {
+            ignoringUserInput = false;
+        }
     }
 
     private IEnumerator shiftDownAndRegenElements(float time, List<CellPosition> totalMatches)
@@ -247,13 +251,7 @@ public class Board : MonoBehaviour
 
         shiftElementsDown();
 
-        StartCoroutine(regenNewElements(CELL_SHIFTING_DOWN_DURATION, () =>
-        {
-            var totalMaches = getTotalMatchedPositions();
-            // If board has generated new matches
-            if (totalMatches.Count > 0) StartCoroutine(shiftDownAndRegenElements(GEN_ELEMENTS_INTERVAL, totalMaches));
-            else ignoringUserInput = false;
-        }));
+        regenNewElements();
     }
 
     private IEnumerator onSwappingComplete(float time, GameObject targetCell)
@@ -266,7 +264,7 @@ public class Board : MonoBehaviour
         {
             StartCoroutine(shiftDownAndRegenElements(GEN_ELEMENTS_INTERVAL, totalMatches));
         }
-        else
+        else // Swapping 2 elements back to their original position if no new match is found
         {
             int selectedRow, selectedColumn, targetRow, targetColumn;
             getCellPosition(targetCell, out targetRow, out targetColumn);
@@ -286,6 +284,8 @@ public class Board : MonoBehaviour
 
             selectedCell.GetComponent<Cell>().onSwapPosTweening(targetCell.transform.position, 1);
             targetCell.GetComponent<Cell>().onSwapPosTweening(selectedCell.transform.position, 2);
+
+            yield return new WaitForSeconds(Cell.SWAPPING_DURATION);
 
             ignoringUserInput = false;
         }
