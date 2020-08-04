@@ -64,6 +64,8 @@ public partial class Board : MonoBehaviour
         }
 
         selectedCell = null;
+
+        preventInitialMatches();
     }
 
     public void onCellSelection(GameObject targetCell)
@@ -87,7 +89,7 @@ public partial class Board : MonoBehaviour
 
         if (totalMatches.Count > 0)
         {
-            StartCoroutine(shiftDownAndRegenElements(BETWEEN_SWAP_AND_REGEN_INTERVAL, totalMatches));
+            StartCoroutine(processBoardMatches(BETWEEN_SWAP_AND_REGEN_INTERVAL, totalMatches));
         }
         else // Swapping 2 elements back to their original position if no new match is found
         {

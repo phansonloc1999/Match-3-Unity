@@ -34,13 +34,13 @@ public class Cell : MonoBehaviour
 
     private void OnMouseOver()
     {
-        if (Input.GetMouseButtonDown(1))
+        if (Input.GetMouseButtonDown(1)) // Player right-clicked ?
         {
             var oldType = elementScript.getType();
             var newType = oldType < Board.getInstance().ELEMENT_SPRITES.Length - 1 ? oldType + 1 : 0;
             elementScript.setType(newType);
 
-            Board.getInstance().updateElementTypesMatrix(gameObject, newType);
+            Board.getInstance().changeElementTypeInMatrix(gameObject, newType);
         }
     }
 

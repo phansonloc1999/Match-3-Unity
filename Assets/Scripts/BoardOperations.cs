@@ -61,7 +61,7 @@ public partial class Board
 
         var totalMatches = getTotalMatchedPositions();
         // If board has generated new matches
-        if (totalMatches.Count > 0) StartCoroutine(shiftDownAndRegenElements(BETWEEN_SWAP_AND_REGEN_INTERVAL, totalMatches));
+        if (totalMatches.Count > 0) StartCoroutine(processBoardMatches(BETWEEN_SWAP_AND_REGEN_INTERVAL, totalMatches));
         else
         {
             ignoringUserInput = false;
@@ -69,21 +69,30 @@ public partial class Board
     }
 
     /// <summary>
-    /// Shifting down and regenerating elements
+    /// Clear matches in game board
     /// </summary>
-    /// <param name="time"></param>
     /// <param name="totalMatches"></param>
-    /// <returns></returns>
-    private IEnumerator shiftDownAndRegenElements(float time, List<CellPosition> totalMatches)
+    private void clearMatches(List<CellPosition> totalMatches)
     {
-        yield return new WaitForSeconds(time);
-
         // Set all matches' element type to -1
         foreach (var match in totalMatches)
         {
             cellsMatrix[match.row, match.column].transform.GetChild(0).GetComponent<Element>().setType(-1);
             elementTypesMatrix[match.row, match.column] = -1;
         }
+    }
+
+    /// <summary>
+    /// Clearing, shifting down and regenerating elements
+    /// </summary>
+    /// <param name="time"></param>
+    /// <param name="totalMatches"></param>
+    /// <returns></returns>
+    private IEnumerator processBoardMatches(float time, List<CellPosition> totalMatches)
+    {
+        yield return new WaitForSeconds(time);
+
+        clearMatches(totalMatches);
 
         shiftElementsDown();
 
@@ -95,7 +104,7 @@ public partial class Board
     /// </summary>
     /// <param name="changedCell"></param>
     /// <param name="changedCellElementType"></param>
-    public void updateElementTypesMatrix(GameObject changedCell, int changedCellElementType)
+    public void changeElementTypeInMatrix(GameObject changedCell, int changedCellElementType)
     {
         for (int row = 0; row < NUM_OF_ROW; row++)
         {
@@ -157,6 +166,26 @@ public partial class Board
                     StartCoroutine(onShiftingDownComplete(CELL_SHIFTING_DOWN_DURATION, cellsMatrix[row, column]));
                 }
             }
+        }
+    }
+
+    /// <summary>
+    /// Prevent initial matches at the start of the game
+    /// </summary>
+    private void preventInitialMatches()
+    {
+        var totalMatches = getTotalMatchedPositions();
+
+        while (totalMatches.Count > 0)
+        {
+            foreach (var match in totalMatches)
+            {
+                var newType = Random.Range(0, ELEMENT_SPRITES.Length);
+                elementTypesMatrix[match.row, match.column] = newType;
+                cellsMatrix[match.row, match.column].GetComponentInChildren<Element>().setType(newType);
+            }
+
+            totalMatches = getTotalMatchedPositions();
         }
     }
 }
