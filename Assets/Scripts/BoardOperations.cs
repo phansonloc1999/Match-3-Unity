@@ -61,7 +61,7 @@ public partial class Board
 
         var totalMatches = getTotalMatchedPositions();
         // If board has generated new matches
-        if (totalMatches.Count > 0) StartCoroutine(shiftDownAndRegenElements(GEN_ELEMENTS_INTERVAL, totalMatches));
+        if (totalMatches.Count > 0) StartCoroutine(shiftDownAndRegenElements(BETWEEN_SWAP_AND_REGEN_INTERVAL, totalMatches));
         else
         {
             ignoringUserInput = false;

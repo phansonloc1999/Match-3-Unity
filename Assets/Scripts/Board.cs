@@ -22,8 +22,8 @@ public partial class Board : MonoBehaviour
     private static float CELL_WIDTH;
     private static float CELL_HEIGHT;
     private const float BOARD_Y = -20f;
-    private const float GEN_ELEMENTS_INTERVAL = 1.0f;
-    public const float CELL_SHIFTING_DOWN_DURATION = 0.5f;
+    private const float BETWEEN_SWAP_AND_REGEN_INTERVAL = 1.0f;
+    public const float CELL_SHIFTING_DOWN_DURATION = 0.7f;
     private static bool ignoringUserInput = false;
 
     public GameObject cellPrefab;
@@ -87,7 +87,7 @@ public partial class Board : MonoBehaviour
 
         if (totalMatches.Count > 0)
         {
-            StartCoroutine(shiftDownAndRegenElements(GEN_ELEMENTS_INTERVAL, totalMatches));
+            StartCoroutine(shiftDownAndRegenElements(BETWEEN_SWAP_AND_REGEN_INTERVAL, totalMatches));
         }
         else // Swapping 2 elements back to their original position if no new match is found
         {
