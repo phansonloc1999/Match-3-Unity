@@ -40,9 +40,9 @@ public partial class Board
     }
 
     /// <summary>
-    /// Regenerate new randomized elements at empty positions after matching
+    /// Regenerate new randomized elements at removed positions after matching
     /// </summary>
-    private void regenNewElements()
+    private void regenRemovedElements()
     {
         for (int row = 0; row < NUM_OF_ROW; row++)
         {
@@ -58,13 +58,23 @@ public partial class Board
                 }
             }
         }
+    }
 
-        var totalMatches = getTotalMatchedPositions();
-        // If board has generated new matches
-        if (totalMatches.Count > 0) StartCoroutine(processBoardMatches(BETWEEN_SWAP_AND_REGEN_INTERVAL, totalMatches));
-        else
+    /// <summary>
+    /// Regenerating all board elements
+    /// </summary>
+    private void regenAllElements()
+    {
+        for (int row = 0; row < NUM_OF_ROW; row++)
         {
-            ignoringUserInput = false;
+            for (int column = 0; column < NUM_OF_COLUMN; column++)
+            {
+                var randomElementType = Random.Range(0, ELEMENT_SPRITES.Length);
+                elementTypesMatrix[row, column] = randomElementType;
+                cellsMatrix[row, column].GetComponentInChildren<Element>().setType(randomElementType);
+
+                cellsMatrix[row, column].GetComponent<Cell>().onRegenNewElement();
+            }
         }
     }
 
@@ -83,12 +93,12 @@ public partial class Board
     }
 
     /// <summary>
-    /// Clearing, shifting down and regenerating elements
+    /// Processing board elements: clearing, shifting down and regenerating board elements
     /// </summary>
     /// <param name="time"></param>
     /// <param name="totalMatches"></param>
     /// <returns></returns>
-    private IEnumerator processBoardMatches(float time, List<CellPosition> totalMatches)
+    private IEnumerator processBoardElements(float time, List<CellPosition> totalMatches)
     {
         yield return new WaitForSeconds(time);
 
@@ -96,7 +106,35 @@ public partial class Board
 
         shiftElementsDown();
 
-        regenNewElements();
+        regenRemovedElements();
+
+        yield return new WaitForSeconds(CELL_SHIFTING_DOWN_DURATION);
+
+        totalMatches = getTotalMatchedPositions();
+        // If board has generated new matches, start process board matches over again
+        if (totalMatches.Count > 0)
+        {
+            StartCoroutine(processBoardElements(SWAP_COMPLETE_PROCESS_BOARD_INTERVAL + 0.5f, totalMatches));
+            yield break;
+        }
+
+        yield return new WaitForSeconds(CELL_SHIFTING_DOWN_DURATION); // Wait for cells & elements shifting down to finish
+
+        // If board has 0 matches and generated 0 potential matches, regenerate all of its elements
+        while (totalMatches.Count == 0 && !hasPotentialMatches())
+        {
+            regenAllElements();
+            totalMatches = getTotalMatchedPositions();
+        }
+
+        // If board has some matches and generated 0 potential matches, start process board matches over again 
+        if (totalMatches.Count > 0)
+        {
+            StartCoroutine(processBoardElements(SWAP_COMPLETE_PROCESS_BOARD_INTERVAL + 0.5f, totalMatches));
+            yield break;
+        }
+
+        ignoringUserInput = false;
     }
 
     /// <summary>
@@ -119,9 +157,8 @@ public partial class Board
         }
     }
 
-
     /// <summary>
-    /// Shifting elements down
+    /// Shifting elements down for Board.CELL_SHIFTING_DOWN_DURATION seconds
     /// </summary>
     private void shiftElementsDown()
     {

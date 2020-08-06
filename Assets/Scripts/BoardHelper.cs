@@ -111,4 +111,50 @@ public partial class Board
     {
         return instance;
     }
+
+    public int getElementType(int row, int column)
+    {
+        if (row >= 0 && row < NUM_OF_ROW && column >= 0 && column < NUM_OF_COLUMN)
+            return elementTypesMatrix[row, column];
+        return -1;
+    }
+
+    public bool hasPotentialMatches()
+    {
+        for (int row = 0; row < NUM_OF_ROW; row++)
+        {
+            for (int column = 0; column < NUM_OF_COLUMN; column++)
+            {
+                if (
+                    (getElementType(row, column) == getElementType(row + 2, column) &&
+                        getElementType(row + 2, column) != -1) &&
+                    (getElementType(row, column) == getElementType(row + 1, column - 1) ||
+                        getElementType(row, column) == getElementType(row + 1, column + 1))
+                )
+                    return true;
+
+                if (
+                    (getElementType(row, column) == getElementType(row, column + 2) &&
+                        getElementType(row, column + 2) != -1) &&
+                    (getElementType(row, column) == getElementType(row - 1, column + 1) ||
+                        getElementType(row, column) == getElementType(row + 1, column + 1))
+                )
+                    return true;
+
+                if ((getElementType(row, column) == getElementType(row, column + 1) && getElementType(row, column + 1) != -1) &&
+                    (getElementType(row, column - 2) == getElementType(row, column) || getElementType(row, column + 3) == getElementType(row, column) ||
+                        getElementType(row + 1, column - 1) == getElementType(row, column) ||
+                        getElementType(row - 1, column - 1) == getElementType(row, column) ||
+                        getElementType(row + 1, column + 2) == getElementType(row, column) ||
+                        getElementType(row - 1, column + 2) == getElementType(row, column)))
+                    return true;
+
+                if (getElementType(row, column) == getElementType(row + 1, column) &&
+                    (getElementType(row, column) == getElementType(row + 3, column) ||
+                        getElementType(row, column) == getElementType(row - 2, column)))
+                    return true;
+            }
+        }
+        return false;
+    }
 }

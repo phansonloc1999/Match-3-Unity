@@ -22,7 +22,7 @@ public partial class Board : MonoBehaviour
     private static float CELL_WIDTH;
     private static float CELL_HEIGHT;
     private const float BOARD_Y = -20f;
-    private const float BETWEEN_SWAP_AND_REGEN_INTERVAL = 1.0f;
+    private const float SWAP_COMPLETE_PROCESS_BOARD_INTERVAL = 1.0f;
     public const float CELL_SHIFTING_DOWN_DURATION = 0.7f;
     private static bool ignoringUserInput = false;
 
@@ -89,7 +89,7 @@ public partial class Board : MonoBehaviour
 
         if (totalMatches.Count > 0)
         {
-            StartCoroutine(processBoardMatches(BETWEEN_SWAP_AND_REGEN_INTERVAL, totalMatches));
+            StartCoroutine(processBoardElements(SWAP_COMPLETE_PROCESS_BOARD_INTERVAL, totalMatches));
         }
         else // Swapping 2 elements back to their original position if no new match is found
         {
