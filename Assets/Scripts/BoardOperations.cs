@@ -95,20 +95,20 @@ public partial class Board
     /// <summary>
     /// Processing board elements: clearing, shifting down and regenerating board elements
     /// </summary>
-    /// <param name="time"></param>
+    /// <param name="executeAfterTime"></param>
     /// <param name="totalMatches"></param>
     /// <returns></returns>
-    private IEnumerator processBoardElements(float time, List<CellPosition> totalMatches)
+    private IEnumerator processBoardElements(float executeAfterTime, List<CellPosition> totalMatches)
     {
-        yield return new WaitForSeconds(time);
+        yield return new WaitForSeconds(executeAfterTime);
 
         clearMatches(totalMatches);
 
         shiftElementsDown();
 
-        regenRemovedElements();
+        yield return new WaitForSeconds(CELL_SHIFTING_DOWN_DURATION); // Wait for cells & elements shifting down to be finished
 
-        yield return new WaitForSeconds(CELL_SHIFTING_DOWN_DURATION); // Wait for cells & elements shifting down to finish
+        regenRemovedElements();
 
         totalMatches = getTotalMatchedPositions();
         // If board has generated new matches, start this processBoardMatches() over again
@@ -118,23 +118,23 @@ public partial class Board
             yield break;
         }
 
+        // Otherwise...
+        /// If board has 0 matches and generated 0 potential matches, regenerate all of its elements until it has some matches or potential matches
         yield return new WaitForSeconds(BETWEEN_REGEN_REMOVED_AND_REGEN_ALL_INTERVAL);
-
-        // If board has 0 matches and generated 0 potential matches, regenerate all of its elements until it has some matches or potential matches
         while (totalMatches.Count == 0 && !hasPotentialMatches())
         {
             regenAllElements();
             totalMatches = getTotalMatchedPositions();
         }
 
-        // If board has some matches then loop back processBoardMatches() 
+        /// If board has some matches afterwards, loop back processBoardMatches() 
         if (totalMatches.Count > 0)
         {
             StartCoroutine(processBoardElements(LOOP_PROCESSING_AFTER_0_POTENTIAL_MATCHES_INTERVAL, totalMatches));
             yield break;
         }
 
-        // Return input control to user
+        /// Return input control to user
         ignoringUserInput = false;
     }
 
