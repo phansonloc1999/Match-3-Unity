@@ -68,6 +68,7 @@ public class Cell : MonoBehaviour
     public void onRegenNewElement()
     {
         var endPos = new Vector3(transform.position.x, transform.position.y, transform.position.z);
+        transform.position = new Vector3(transform.position.x, transform.position.y + 10, transform.position.z);
 
         transform.DOMove(endPos, Board.CELL_SHIFTING_DOWN_DURATION);
     }
