@@ -108,32 +108,33 @@ public partial class Board
 
         regenRemovedElements();
 
-        yield return new WaitForSeconds(CELL_SHIFTING_DOWN_DURATION);
+        yield return new WaitForSeconds(CELL_SHIFTING_DOWN_DURATION); // Wait for cells & elements shifting down to finish
 
         totalMatches = getTotalMatchedPositions();
-        // If board has generated new matches, start process board matches over again
+        // If board has generated new matches, start this processBoardMatches() over again
         if (totalMatches.Count > 0)
         {
-            StartCoroutine(processBoardElements(SWAP_COMPLETE_PROCESS_BOARD_INTERVAL + 0.5f, totalMatches));
+            StartCoroutine(processBoardElements(LOOP_PROCESSING_AFTER_REGEN_REMOVED, totalMatches));
             yield break;
         }
 
-        yield return new WaitForSeconds(CELL_SHIFTING_DOWN_DURATION); // Wait for cells & elements shifting down to finish
+        yield return new WaitForSeconds(BETWEEN_REGEN_REMOVED_AND_REGEN_ALL_INTERVAL);
 
-        // If board has 0 matches and generated 0 potential matches, regenerate all of its elements
+        // If board has 0 matches and generated 0 potential matches, regenerate all of its elements until it has some matches or potential matches
         while (totalMatches.Count == 0 && !hasPotentialMatches())
         {
             regenAllElements();
             totalMatches = getTotalMatchedPositions();
         }
 
-        // If board has some matches and generated 0 potential matches, start process board matches over again 
+        // If board has some matches then loop back processBoardMatches() 
         if (totalMatches.Count > 0)
         {
-            StartCoroutine(processBoardElements(SWAP_COMPLETE_PROCESS_BOARD_INTERVAL + 0.5f, totalMatches));
+            StartCoroutine(processBoardElements(LOOP_PROCESSING_AFTER_0_POTENTIAL_MATCHES_INTERVAL, totalMatches));
             yield break;
         }
 
+        // Return input control to user
         ignoringUserInput = false;
     }
 
