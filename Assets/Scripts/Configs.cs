@@ -1,9 +1,10 @@
-﻿using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
+﻿using UnityEngine;
+using UnityEngine.U2D;
 
 public class Configs : MonoBehaviour
 {
+    public PixelPerfectCamera perfectCameraScript;
+
     // Start is called before the first frame update
     void Start()
     {

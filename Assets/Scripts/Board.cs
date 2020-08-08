@@ -22,7 +22,7 @@ public partial class Board : MonoBehaviour
     private static float CELL_WIDTH;
     private static float CELL_HEIGHT;
     private const float BOARD_Y = -20f;
-    private const float SWAP_COMPLETE_PROCESS_BOARD_INTERVAL = 1.0f;
+    private const float SWAP_COMPLETE_PROCESS_BOARD_INTERVAL = 0.2f;
     public const float CELL_SHIFTING_DOWN_DURATION = 0.7f;
     public const float BETWEEN_REGEN_REMOVED_AND_REGEN_ALL_INTERVAL = 1.0f;
     public const float LOOP_PROCESSING_AFTER_0_POTENTIAL_MATCHES_INTERVAL = 1.0f;
@@ -69,6 +69,11 @@ public partial class Board : MonoBehaviour
         selectedCell = null;
 
         preventInitialMatches();
+
+        while (!hasPotentialMatches())
+        {
+            regenAllElements();
+        }
     }
 
     public void onCellSelection(GameObject targetCell)
