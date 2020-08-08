@@ -54,7 +54,7 @@ public partial class Board
                     elementTypesMatrix[row, column] = randomElementType;
                     cellsMatrix[row, column].GetComponentInChildren<Element>().setType(randomElementType);
 
-                    cellsMatrix[row, column].GetComponent<Cell>().onRegenNewElement();
+                    cellsMatrix[row, column].GetComponent<Cell>().onRegenFallDownElement();
                 }
             }
         }
@@ -72,8 +72,6 @@ public partial class Board
                 var randomElementType = Random.Range(0, ELEMENT_SPRITES.Length);
                 elementTypesMatrix[row, column] = randomElementType;
                 cellsMatrix[row, column].GetComponentInChildren<Element>().setType(randomElementType);
-
-                cellsMatrix[row, column].GetComponent<Cell>().onRegenNewElement();
             }
         }
     }
