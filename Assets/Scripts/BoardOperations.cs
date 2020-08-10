@@ -192,7 +192,7 @@ public partial class Board
         }
 
         // Disable empty cell objects to make them invisible until shifting down is done
-        for (int row = NUM_OF_ROW - 2; row >= 0; row--)
+        for (int row = NUM_OF_ROW - 1; row >= 0; row--)
         {
             for (int column = 0; column < NUM_OF_COLUMN; column++)
             {

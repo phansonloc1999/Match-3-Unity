@@ -38,18 +38,30 @@ public partial class Board : MonoBehaviour
     private GameObject[,] cellsMatrix;
     private int[,] elementTypesMatrix;
 
-    private static Board instance;
+    private static Board singletonInstance;
 
     void Start()
     {
-        instance = this;
+        singletonInstance = this; // Assign reference to the single instance of this class at start
 
-        SpriteRenderer renderer = cellPrefab.GetComponent<SpriteRenderer>();
-        CELL_WIDTH = renderer.bounds.size.x;
-        CELL_HEIGHT = renderer.bounds.size.y;
+        setCellWidthHeight();
 
         transform.position = new Vector3(-NUM_OF_COLUMN * CELL_WIDTH / 2, BOARD_Y + NUM_OF_ROW * CELL_HEIGHT / 2, transform.position.z);
 
+        initMatrixes();
+
+        selectedCell = null;
+
+        preventInitialMatches();
+
+        while (!hasPotentialMatches())
+        {
+            regenAllElements();
+        }
+    }
+
+    private void initMatrixes()
+    {
         cellsMatrix = new GameObject[NUM_OF_ROW, NUM_OF_COLUMN];
         elementTypesMatrix = new int[NUM_OF_ROW, NUM_OF_COLUMN];
         for (int row = 0; row < NUM_OF_ROW; row++)
@@ -65,15 +77,13 @@ public partial class Board : MonoBehaviour
                 elementTypesMatrix[row, column] = elementType;
             }
         }
+    }
 
-        selectedCell = null;
-
-        preventInitialMatches();
-
-        while (!hasPotentialMatches())
-        {
-            regenAllElements();
-        }
+    private void setCellWidthHeight()
+    {
+        SpriteRenderer renderer = cellPrefab.GetComponent<SpriteRenderer>();
+        CELL_WIDTH = renderer.bounds.size.x;
+        CELL_HEIGHT = renderer.bounds.size.y;
     }
 
     public void onCellSelection(GameObject targetCell)

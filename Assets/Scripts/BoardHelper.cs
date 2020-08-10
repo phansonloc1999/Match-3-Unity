@@ -109,7 +109,7 @@ public partial class Board
 
     public static Board getInstance()
     {
-        return instance;
+        return singletonInstance;
     }
 
     public int getElementType(int row, int column)
