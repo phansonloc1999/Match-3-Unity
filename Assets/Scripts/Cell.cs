@@ -37,10 +37,10 @@ public class Cell : MonoBehaviour
         if (Input.GetMouseButtonDown(1)) // Player right-clicked ?
         {
             var oldType = elementScript.getType();
-            var newType = oldType < Board.getInstance().ELEMENT_SPRITES.Length - 1 ? oldType + 1 : 0;
+            var newType = oldType < boardScript.ELEMENT_SPRITES.Length - 1 ? oldType + 1 : 0;
             elementScript.setType(newType);
 
-            Board.getInstance().changeElementTypeInMatrix(gameObject, newType);
+            boardScript.changeElementTypeInMatrix(gameObject, newType);
         }
     }
 

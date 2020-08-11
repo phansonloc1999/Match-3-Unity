@@ -38,12 +38,8 @@ public partial class Board : MonoBehaviour
     private GameObject[,] cellsMatrix;
     private int[,] elementTypesMatrix;
 
-    private static Board singletonInstance;
-
     void Start()
     {
-        singletonInstance = this; // Assign reference to the single instance of this class at start
-
         setCellWidthHeight();
 
         transform.position = new Vector3(-NUM_OF_COLUMN * CELL_WIDTH / 2, BOARD_Y + NUM_OF_ROW * CELL_HEIGHT / 2, transform.position.z);

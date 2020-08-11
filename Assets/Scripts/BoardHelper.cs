@@ -107,11 +107,6 @@ public partial class Board
         return ignoringUserInput;
     }
 
-    public static Board getInstance()
-    {
-        return singletonInstance;
-    }
-
     public int getElementType(int row, int column)
     {
         if (row >= 0 && row < NUM_OF_ROW && column >= 0 && column < NUM_OF_COLUMN)
